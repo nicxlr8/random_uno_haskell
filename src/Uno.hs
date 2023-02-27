@@ -1,9 +1,7 @@
--- CPSC 312 - 2023 - Games in Haskell
-module MagicSum where
 
--- To run it, try:
--- ghci
--- :load MagicSum
+-- CPSC 312 - 2023 - Games in Haskell
+module Uno where
+
 
 import System.Random
 import Data.Char
@@ -42,21 +40,12 @@ type Game = Action -> State -> IO Result
 
 type Player = State -> Action
 
------- The UNO Game -------
-
 type Action = IO Int
 
--- (your action, other action)
 type InternalState = ([IO Card],  [IO Card], IO Card)
 
 
---magicsum :: Game
---magicsum move (State (mine,others) available) 
---  | win move mine                = EndOfGame 1  magicsum_start     -- agent wins
---    | available == [move]          = EndOfGame 0  magicsum_start     -- no more moves, tie
---    | otherwise                    =
---          ContinueGame (State (others,(move:mine))   -- note roles have flipped
- --                       [act | act <- available, act /= move])
+
 
 get_colour (Card col number) = col
 
@@ -85,10 +74,6 @@ uno io_move (State (mine,others, top)) = do
                                 else do
                                     played <- (play_card (State (mine,others,top)) move)
                                     return played
-                                    --return (ContinueGame True (State (mine, others, top)))   -- invalid move, loop back    
-                             {-  else
-                        -- Change state based on card    -- TOOOOOOOODOOOOOOOO
-                        --             return ContinueGame (State (others,(move:mine), (mine !! (move - 1))))   -- note roles   -}
                          else return (ContinueGame False (return (State (others, mine, top))))   -- invalid move, loop back   
             else if (move == 0) -- move is Draw
                 then do
@@ -122,7 +107,7 @@ play_card (State (phand, ohand, top_c)) move = do
                 number17 <- getStdRandom (randomR (13,14))
                 return (ContinueGame False (return (State ((generate_card number1 number8 number16):(generate_card number2 number9 number17):ohand, removed_player_hand, (return top)))))
         else do 
-            putStrLn("Pick a color")
+            putStrLn("Pick a color: R, B, Y, G")
             rline <- getLine
             let line = (head rline)
             if (((length rline) == 1) && (toUpper line == 'Y' || toUpper line == 'G' || toUpper line == 'B' || toUpper line == 'R' ))
@@ -154,13 +139,6 @@ remove_nth n (h:t)
     | n-1>0 = h:remove_nth (n-1) t
     | otherwise = remove_nth (n-1) t
 
-
---uno_test = do
---    let phand = generate_card : generate_card : generate_card : generate_card : generate_card : generate_card : generate_card : []
---    let ohand = generate_card : generate_card : generate_card : generate_card : generate_card : generate_card : generate_card : []
---    let top = generate_card
---    State (phand, ohand, top)
-
 -- win n ns = the agent wins if it selects n and ns is a list of [n]
 win phand  =
     do
@@ -172,61 +150,67 @@ win phand  =
 
 uno_start = do
     number1 <- getStdRandom (randomR (1, 112))
-    number2 <- getStdRandom (randomR (1, 112))
-    number3 <- getStdRandom (randomR (1, 112))
+    number2 <- getStdRandom (randomR (10,12))
+    number3 <- getStdRandom (randomR (13,14))
+    
     number4 <- getStdRandom (randomR (1, 112))
-    number5 <- getStdRandom (randomR (1, 112))
-    number6 <- getStdRandom (randomR (1, 112))
+    number5 <- getStdRandom (randomR (10,12))
+    number6 <- getStdRandom (randomR (13,14))
+    
     number7 <- getStdRandom (randomR (1, 112))
     number8 <- getStdRandom (randomR (10,12))
-    number9 <- getStdRandom (randomR (10,12))
-    number10 <- getStdRandom (randomR (10,12))
+    number9 <- getStdRandom (randomR (13,14))
+    
+    number10 <- getStdRandom (randomR (1, 112))
     number11 <- getStdRandom (randomR (10,12))
-    number12 <- getStdRandom (randomR (10,12))
-    number13 <- getStdRandom (randomR (10,12))
+    number12 <- getStdRandom (randomR (13,14))
+    
+    number13 <- getStdRandom (randomR (1, 112))
     number14 <- getStdRandom (randomR (10,12))
     number15 <- getStdRandom (randomR (13,14))
-    number16 <- getStdRandom (randomR (13,14))
-    number17 <- getStdRandom (randomR (13,14))
+    
+    number16 <- getStdRandom (randomR (1, 112))
+    number17 <- getStdRandom (randomR (10,12))
     number18 <- getStdRandom (randomR (13,14))
-    number19 <- getStdRandom (randomR (13,14))
-    number20 <- getStdRandom (randomR (13,14))
+    
+    number19 <- getStdRandom (randomR (1, 112))
+    number20 <- getStdRandom (randomR (10,12))
     number21 <- getStdRandom (randomR (13,14))
-    return (State ((generate_card number1 number8 number15):(generate_card number2 number9 number16):(generate_card number3 number10 number17):[], (generate_card number4 number11 number18):(generate_card number5 number12 number19):(generate_card number6 number13 number20):[] , (generate_card number7 number14 number21)))
+    
+    number22 <- getStdRandom (randomR (1, 112))
+    number23 <- getStdRandom (randomR (10,12))
+    number24 <- getStdRandom (randomR (13,14))
+    
+    number25 <- getStdRandom (randomR (1, 112))
+    number26 <- getStdRandom (randomR (10,12))
+    number27 <- getStdRandom (randomR (13,14))
+    
+    number28 <- getStdRandom (randomR (1, 112))
+    number29 <- getStdRandom (randomR (10,12))
+    number30 <- getStdRandom (randomR (13,14))
+    
+    number31 <- getStdRandom (randomR (1, 112))
+    number32 <- getStdRandom (randomR (10,12))
+    number33 <- getStdRandom (randomR (13,14))
+    
+    number34 <- getStdRandom (randomR (1, 112))
+    number35 <- getStdRandom (randomR (10,12))
+    number36 <- getStdRandom (randomR (13,14))
+    
+    number37 <- getStdRandom (randomR (1, 112))
+    number38 <- getStdRandom (randomR (10,12))
+    number39 <- getStdRandom (randomR (13,14))
+    
+    number40 <- getStdRandom (randomR (1, 112))
+    number41 <- getStdRandom (randomR (10,12))
+    number42 <- getStdRandom (randomR (13,14))
+    
+    numbertop <- getStdRandom (randomR (1, 80))
 
+    
+    return (State ((generate_card number1 number2 number3):(generate_card number4 number5 number6):(generate_card number7 number8 number9):(generate_card number10 number11 number12):(generate_card number13 number14 number15):(generate_card number16 number17 number18):(generate_card number19 number20 number21):[] , (generate_card number22 number23 number24):(generate_card number25 number26 number27):(generate_card number28 number29 number30):(generate_card number31 number32 number33):(generate_card number34 number35 number36):(generate_card number37 number38 number39):(generate_card number40 number41 number42):[] , (generate_top numbertop)))
 
---magicsum_start = State ([],[]) [Action n | n <- [1..9]]
-
--- show and read actions just as the integer
-
-------- A Player -------
-
---simple_player :: Player
--- this player has an ordering of the moves, and chooses the first one available
---simple_player (State _ avail) = head [Action e | e <- [5,6,4,2,8,1,3,7,9],
---                                               Action e `elem` avail]
-
-
--- Test cases
--- magicsum (simple_player magicsum_start) magicsum_start
---a i = Action i  -- make it easier to type
---as lst = [Action i | i <- lst]
--- magicsum (a 6) (State (as [3,5], as [2,7]) (as [1,4,6,8,9])) 
--- magicsum (a 3) (State (as [5,7], as [2,9]) (as [1,3,4,6,8])) 
-
-
-{-simple_player :: Player
--- this player has an ordering of the moves, and chooses the first one available
-simple_player (State (mine, other, top)) = do
-        top_card <- top
-        my_cards <- sequence mine
-        let playable =  [e | e <- my_cards, possible_move e top_card]
-        if (not ([] == playable))
-                then do
-                    return 1
-                else do
-                    return 0 -}
-                    
+   
 simple_player :: Player
 -- this player has an ordering of the moves, and chooses the first one available
 simple_player (State (mine, other, top)) = do
@@ -252,13 +236,21 @@ possible_move (Card col num) (Card top_col top_num)
     | (num == top_num && (num /= 13 && num /= 14)) = True
     | otherwise = False
 
+generate_top :: Int -> IO Card
+generate_top rand_num = 
+    do
+        if (rand_num <=20)
+            then return (Card (Colour 'Y') (rand_num `mod` 10))
+            else if (rand_num > 20 && rand_num <= 40)
+                then return (Card (Colour 'B') (rand_num `mod` 10))
+            else if (rand_num > 40 && rand_num <=60)
+                then return (Card (Colour 'R') (rand_num `mod` 10))
+            else return (Card (Colour 'G') (rand_num `mod` 10))
+
 
 generate_card :: Int -> Int -> Int -> IO Card
 generate_card rand_num rand_spec rand_wild = 
     do
-        --rand_num <- getStdRandom (randomR (1, 112))
-        --rand_spec <- getStdRandom (randomR (10,12))
-        --rand_wild <- getStdRandom (randomR (13,14))
         if (rand_num <=20)
             then return (Card (Colour 'Y') (rand_num `mod` 10))
             else if (rand_num > 20 && rand_num <= 40)
@@ -276,5 +268,6 @@ generate_card rand_num rand_spec rand_wild =
             else if (rand_num > 98 && rand_num <=104)
                 then return (Card (Colour 'G') rand_spec)
             else return (Card (Colour 'W') rand_wild)
+
 
 

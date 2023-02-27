@@ -1,28 +1,14 @@
 -- CPSC 312 - 2023 - Games in Haskell
 module Play where
 
--- To run it, try:
--- ghci
--- :load Play
-
-
-import MagicSum
--- import CountGame
-
--- import Minimax  -- make sure same game is imported in Minimax
---import Minimax_mem
-
+import Uno
 
 import System.Random
 import System.IO
 import Text.Read   (readMaybe)
 
 
--- ‘Y’ = 1-20  mod 10 - 1
---        then (Card (Colour 'Y') (rand_num `mod` 10) -1)
---          putStrLn ( show (Card (Colour 'Y') ((rand_num `mod` 10) -1)))
 type TournammentState = (Int,Int,Int)   -- wins, losses, ties
-
 
 play :: Game -> State -> Player -> TournammentState -> IO TournammentState
 
@@ -41,21 +27,22 @@ play game start_state opponent ts =
             then return ts
         else play game start_state opponent ts
 
-person_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
--- opponent has played, the person must now play
 
+person_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
 person_play game (ContinueGame val state) opponent ts =
     do
       (State (mhand, chand, top)) <- state
       myhand <- sequence mhand
       top_c <- top
+      putStrLn("")
       putStrLn ("Top card is: " ++ show top_c)
       putStrLn ("Your hand: " ++ show myhand)
+      putStrLn ("To draw a card enter: 0, To play a card enter the position of the card in your hand ")
       line <- getLine
       case (readMaybe line :: Maybe Int) of
             Nothing ->
                 do
-                    putStrLn ("Please enter an integer :)")
+                    putStrLn ("Please enter an integer")
                     person_play game (ContinueGame True (return (State (mhand, chand, top)))) opponent ts
             Just action ->
                 do
@@ -95,7 +82,8 @@ computer_play game (ContinueGame val io_state) opponent ts = do
           opponent_move = opponent (State (chand, mhand, top)) -- Computer plays a move
         in
           do
-            putStrLn ("Computer has "++ show (length chand))
+            putStrLn("")
+            putStrLn ("Computer has "++ show (length chand) ++ " cards")
             cresult <- (game opponent_move (State (chand, mhand, top)))
             if ((showWhat cresult) == "End")
                 then
@@ -121,27 +109,6 @@ update_tournament_state val (wins,losses,ties)
   | otherwise = do
       putStrLn "Computer won!"
       return (wins,losses+1,ties)
-
--- If you imported MagicSum here and in Minimax try:
--- play magicsum magicsum_start simple_player (0,0,0)
--- play magicsum magicsum_start (mm_player magicsum) (0,0,0) -- minimax player
-
--- If you imported CountGameNew here and in Minimax_mem try:
--- let (cg, ss) = createCountGame 20 [1,2,3,5,7] in play cg ss (simple_count_player 20 [1,2,3,5,7]) (0,0,0)
--- let (cg, ss) = createCountGame 20 [1,2,3,5,7] in play cg ss (mm_player cg) (0,0,0) 
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
