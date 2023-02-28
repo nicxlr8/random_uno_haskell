@@ -1,35 +1,34 @@
--- CPSC 312 - 2023 - Games in Haskell
-module Play where
+-- Templated from https://www.cs.ubc.ca/~poole/cs312/2023/haskell/Play.hs
+
+module Play (module Play) where
 
 import Uno
 
-import System.Random
-import System.IO
 import Text.Read   (readMaybe)
 
+-- a tournament state
+type TournammentState = (Int,Int)   -- wins, losses
 
-type TournammentState = (Int,Int,Int)   -- wins, losses, ties
-
+-- plays the game and returns the state of the tournament
 play :: Game -> State -> Player -> TournammentState -> IO TournammentState
-
 play game start_state opponent ts =
-  let (wins, losses, ties) = ts in
+  let (wins, losses) = ts in
   do
-    putStrLn ("Tournament results: "++ show wins++ " wins "++show losses++" losses "++show ties++" ties")
+    putStrLn ("Tournament results: "++ show wins++ " wins "++show losses++" losses")
     putStrLn "Who starts? 0=you, 1=computer, 2=exit."
     line <- getLine
     if line == "0"
         then
-            person_play game (ContinueGame True uno_start) opponent ts
+            person_play game (ContinueGame True (return start_state)) opponent ts
         else if line ==  "1"
-            then computer_play game (ContinueGame True uno_start) opponent ts
+            then computer_play game (ContinueGame True (return start_state)) opponent ts
         else if line == "2"
             then return ts
         else play game start_state opponent ts
 
-
+-- plays the person's move
 person_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
-person_play game (ContinueGame val state) opponent ts =
+person_play game (ContinueGame _ state) opponent ts =
     do
       (State (mhand, chand, top)) <- state
       myhand <- sequence mhand
@@ -53,30 +52,34 @@ person_play game (ContinueGame val state) opponent ts =
                                 person_play game presult opponent ts
                         else
                             do
-                                let (ContinueGame valid result_state) = presult
+                                let (valid, result_state) = extract_bool_state presult
                                 (State (rchand, rmhand, rtop)) <- result_state
                                 if (valid)
-                                    then computer_play game presult opponent ts
+                                    then computer_play game (ContinueGame valid result_state) opponent ts
                                     else person_play game (ContinueGame valid (return (State (rmhand, rchand, rtop)))) opponent ts
-                        
-        
-
+                                    
+-- defines the tournament state for a person's winning move
 person_play game (EndOfGame val io_start_state) opponent ts =
   do
     start_state <- io_start_state
     newts <- update_tournament_state (val) ts  -- val is value to computer; -val is value for person
     play game start_state opponent newts
 
+-- extract boolean and state from a Result
+extract_bool_state :: Result -> (Bool, IO State)
+extract_bool_state (EndOfGame _ _) = (True, uno_start)
+extract_bool_state (ContinueGame valid result_state) = (valid, result_state)                               
+
+-- plays the computer's move                                                
 computer_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
--- computer_play game current_result opponent ts
--- person has played, the computer must now play
 computer_play game (EndOfGame val io_start_state) opponent ts =
     do  
         start_state <- io_start_state
         newts <- update_tournament_state (-val) ts
         play game start_state opponent newts
-
-computer_play game (ContinueGame val io_state) opponent ts = do
+        
+-- defines the tournament state for a computer's winning move
+computer_play game (ContinueGame _ io_state) opponent ts = do
       (State (chand, mhand, top)) <- io_state
       let 
           opponent_move = opponent (State (chand, mhand, top)) -- Computer plays a move
@@ -91,26 +94,22 @@ computer_play game (ContinueGame val io_state) opponent ts = do
                         computer_play game cresult opponent ts
                 else
                     do
-                        let (ContinueGame valid result_state) = cresult
+                        let (valid, result_state) = extract_bool_state cresult
                         (State (rmhand, rchand, rtop)) <- result_state
                         if (valid)
-                            then person_play game cresult opponent ts
+                            then person_play game (ContinueGame valid result_state) opponent ts
                             else computer_play game (ContinueGame valid (return (State (rchand, rmhand, rtop)))) opponent ts
 
-update_tournament_state:: Double -> TournammentState -> IO TournammentState
 -- given value to the person, the tournament state, return the new tournament state
-update_tournament_state val (wins,losses,ties)
+update_tournament_state:: Double -> TournammentState -> IO TournammentState
+update_tournament_state val (wins,losses)
   | val > 0 = do
       putStrLn "You Won"
-      return (wins+1,losses,ties)
-  | val == 0 = do
-      putStrLn "It's a tie"
-      return (wins,losses,ties+1)
+      return (wins+1,losses)
   | otherwise = do
       putStrLn "Computer won!"
-      return (wins,losses+1,ties)
-
-
+      return (wins,losses+1)
+      
 
 
 
